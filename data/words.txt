@@ -1,0 +1,23 @@
+bag - сумка
+ball - мяч
+bank - банк
+basin - бассейн
+basket - корзина
+bath - ванна, купаться
+bed - кровать
+bee - пчела
+bell - колокольчик
+berry - ягода
+bite - укус, кусать
+blood - кровь
+blow - удар, дуть
+body - тело
+brass - медь, руководство
+bread - хлеб
+breath - дыхание
+brother - брат
+building - здание, строение
+burn - ожог, гореть
+burst - взрыв, взрывать
+business - бизнес, деловой
+butter - масло
