@@ -8,6 +8,7 @@ import os, sys
 import shutil
 import time
 from threading import Thread
+import heapq
 
 
 class MyThread(Thread):
@@ -47,11 +48,11 @@ def show_new_word():
     text.configure(state='disabled')
 
 def restart():
-    training()
-    global is_stop; global stat_i; global time_; global time_pass
+    #training()
+    global is_stop; global stat_i; global time_; global time_pass; global chance
     is_stop = False
     text_input.configure(state='normal')
-    stat_i = 1; time_ = 0; time_pass = 0
+    stat_i = 1; time_ = 0; time_pass = 0; chance+=1
     zerroing()
     show_new_word()
     kol_word(len(words))
@@ -78,6 +79,7 @@ def fill():
         dict_words[i] = w2
         dict_words[-i] = w1
         i+=1
+    training() #
     restart()
 
 def kol_word(len):
@@ -150,21 +152,31 @@ def probability(answer, correct_answer):
 
 def statistics():
     close_settings()
-    global stat_i
-    file_ = "statistics/statistics_" + str(stat_i) + ".txt"
+    do_dir()
+    global stat_i; global chance
+    file_ = "statistics/statistics" + str(chance) + "_" + str(stat_i) + ".txt"
     stat_i+=1; answer = 0; wrong_answer = 0
+    
+    sort_answers = []
+    for i in range(1, len(words)+1):
+        str_ans = '{:>20} <-> {:<20} |  Всего: {} |  Неверно: {}\n'.format(str(dict_words[i]), str(dict_words[-i]), str(attempt[i]), str(incorrect[i]))
+        heapq.heappush(sort_answers, (-incorrect[i], str_ans))
+        answer+=attempt[i]; wrong_answer+=incorrect[i]
     f = open(file_, 'w')
     for i in range(1, len(words)+1):
-        f.write(str(dict_words[i]) + " <-> " + str(dict_words[-i]) + "  |   Всего ответов: " + str(attempt[i]) + ", Неверных ответов: " + str(incorrect[i]) +'\n')
-        answer+=attempt[i]; wrong_answer+=incorrect[i]
+        f.write(heapq.heappop(sort_answers)[1])
     f.close()
     probability(answer, answer - wrong_answer)
+
+def do_dir():
+    path = "statistics/"
+    if not os.access(path, os.F_OK):
+        os.mkdir(path)
 
 def training():
     path = "statistics/"
     if os.access(path, os.F_OK):
         shutil.rmtree(path)
-    os.mkdir(path)
 
 ######################################################### Settings
 
@@ -212,7 +224,7 @@ def settings():
 ######################################################### Main
 
 dict_words = {}; words = []; incorrect = []; attempt = []
-correct_word = 0; stat_i = 1; mode = "eng"; open_sett = False; all_time = 10; time_ = 0; time_pass = 0; is_stop = False
+correct_word = 0; stat_i = 1; mode = "eng"; open_sett = False; all_time = 10; time_ = 0; time_pass = 0; is_stop = False; chance = 0
 
 root = Tk()
 root.title("Learning")
