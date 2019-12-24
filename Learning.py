@@ -42,16 +42,17 @@ def exit():
 def show_new_word():
     if is_stop:
         restart()
-    text.configure(state='normal')
+        return
+    text.configure(state='normal', background = "white")
     text.delete(1.0, END)
     text.insert(END, generate_word(), "center")
     text.configure(state='disabled')
 
 def restart():
-    #training()
     global is_stop; global stat_i; global time_; global time_pass; global chance
     is_stop = False
-    text_input.configure(state='normal')
+    text_input.configure(state='normal', background = "white")
+    text_input.delete(1.0, END)
     stat_i = 1; time_ = 0; time_pass = 0; chance+=1
     zerroing()
     show_new_word()
@@ -79,8 +80,25 @@ def fill():
         dict_words[i] = w2
         dict_words[-i] = w1
         i+=1
-    training() #
-    restart()
+    training()
+    for_start()
+
+def for_start():
+    text_time.insert(END, "time", "center")
+    text_time.configure(state='disabled')
+
+    text_input.configure(state='normal', background = "yellow")
+    text_input.insert(END, "Start new game!", "center")
+    text_input.configure(state='disabled')
+    text_correct.configure(state='normal', background = "red")
+    text_correct.insert(END, "Start new game!", "center")
+    text_correct.configure(state='disabled')
+    text.configure(state='normal', background = "green")
+    text.insert(END, "Start new game!", "center")
+    text.configure(state='disabled')
+    global is_stop
+    is_stop = True
+    zerroing()
 
 def kol_word(len):
     text_correct.configure(state='normal', background = "yellow")
@@ -106,6 +124,7 @@ def generate_word():
     return dict_words[-correct_word]
 
 def keypress(key): #in linux
+    #print(key.keycode) #change for other sistem
     if key.keycode == 36: #enter
         input()
     elif key.keycode == 9: #esc
@@ -114,23 +133,35 @@ def keypress(key): #in linux
         statistics()
     elif key.keycode == 70: #f4
         settings()
+    elif key.keycode == 51: #\
+        new_game()
 
 def input():
-    if close_settings():
-        return
-    s = re.split(r'\s+', text_input.get(1.0, END))
-    if s[0] == '':
-        s[0] = s[1]
-    text_input.delete(1.0, END)
-    
-    if correct_word != 0:
-        attempt[correct_word]+=1
-        if dict_words[correct_word] == s[0]:
-            answer(True)
-        else:
-            incorrect[abs(correct_word)]+=1
-            answer(False)
-    show_new_word()
+    global new_game_
+    if not is_stop or new_game_:
+        new_game_ = False
+        if close_settings():
+            return
+        s = re.split(r'\s+', text_input.get(1.0, END))
+        if s[0] == '':
+            s[0] = s[1]
+        text_input.delete(1.0, END)
+        
+        if correct_word != 0:
+            attempt[abs(correct_word)]+=1
+            if dict_words[correct_word] == s[0]:
+                answer(True)
+            else:
+                incorrect[abs(correct_word)]+=1
+                answer(False)
+        show_new_word()
+
+def new_game():
+    if is_stop:
+        close_settings()
+        global new_game_
+        new_game_ = True
+        input()
 
 def answer(is_correct):
     if is_correct:
@@ -224,7 +255,7 @@ def settings():
 ######################################################### Main
 
 dict_words = {}; words = []; incorrect = []; attempt = []
-correct_word = 0; stat_i = 1; mode = "eng"; open_sett = False; all_time = 10; time_ = 0; time_pass = 0; is_stop = False; chance = 0
+correct_word = 0; stat_i = 1; mode = "eng"; open_sett = False; all_time = 10; time_ = 0; time_pass = 0; is_stop = False; chance = 0; new_game_ = False
 
 root = Tk()
 root.title("Learning")
@@ -244,7 +275,9 @@ text.pack()
 text.place(x = 200, y = 40, width = 300, height = 45)
 
 text_input = Text(panel)
-text_input.configure(state='normal', font=("Verdana", 25), background="white")
+text_input.tag_configure("center", justify='center')
+text_input.tag_add("center", 1.0, "end")
+text_input.configure(state='disabled', font=("Verdana", 25), background="white")
 text_input.pack()
 text_input.place(x = 200, y = 120, width = 300, height = 45)
 
@@ -258,12 +291,12 @@ text_correct.place(x = 200, y = 200, width = 300, height = 45)
 text_time = Text(panelFrame)
 text_time.tag_configure("center", justify='center')
 text_time.tag_add("center", 1.0, "end")
-text_time.configure(state='disabled', font=("Verdana", 20), background="white", cursor="arrow")
+text_time.configure(state='normal', font=("Verdana", 20), background="white", cursor="arrow")
 text_time.pack()
 text_time.place(x = 0, y = 0, width = 100, height = 40)
 
 
-but_next = Button(panelFrame, text = 'Next', command = input)
+but_next = Button(panelFrame, text = 'New game', command = new_game)
 but_next.bind("<Button-1>")
 but_next.pack()
 but_next.place(x = 310, y = 0, width = 80, height = 40)
