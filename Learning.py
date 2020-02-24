@@ -1,4 +1,5 @@
 import secrets as rand
+from random import randint
 import string
 from tkinter import *
 import re
@@ -37,6 +38,7 @@ def exit():
     global stat_i
     stat_i = 999
     statistics()
+    stat_i+=1
     root.destroy()
 
 def show_new_word():
@@ -64,8 +66,9 @@ def zerroing():
     incorrect = [0 for x in range(len(words)+1)]
     attempt = [0 for x in range(len(words)+1)]
 
-def fill():
-    f = open('data/words.txt', 'r')
+def fill(file):
+    f = open(file, 'r')
+    #f = open('data/words.txt', 'r')
     line = f.readline()
     while line:
         words.append(line)
@@ -119,6 +122,7 @@ def timer():
 def generate_word():
     global correct_word
     correct_word = rand.randbelow(len(words)) + 1
+    #correct_word = randint(1, len(words))
     if ((mode == "both" and rand.randbelow(2) == 0) or mode == "rus"):
         correct_word *= -1
     return dict_words[-correct_word]
@@ -251,11 +255,22 @@ def settings():
     text_change_time.place(x = 8, y = 90, width = 60, height = 20)
     open_sett = True
     
+def show_txt():
+    os.system('gedit ' + file)  
+    
+def show_stat():
+    global stat_i; global chance
+    if stat_i != 1:
+        file_ = "statistics/statistics" + str(chance) + "_" + str(stat_i-1) + ".txt"
+        os.system('gedit ' + file_)
+
 
 ######################################################### Main
 
 dict_words = {}; words = []; incorrect = []; attempt = []
 correct_word = 0; stat_i = 1; mode = "eng"; open_sett = False; all_time = 10; time_ = 0; time_pass = 0; is_stop = False; chance = 0; new_game_ = False
+file = "data/lesson.txt"
+#file = "data/words.txt"
 
 root = Tk()
 root.title("Learning")
@@ -272,21 +287,21 @@ text.tag_configure("center", justify='center')
 text.tag_add("center", 1.0, "end")
 text.configure(state='disabled', font=("Verdana", 25), background="bisque", cursor="arrow")
 text.pack()
-text.place(x = 200, y = 40, width = 300, height = 45)
+text.place(x = 100, y = 40, width = 500, height = 45)
 
 text_input = Text(panel)
 text_input.tag_configure("center", justify='center')
 text_input.tag_add("center", 1.0, "end")
 text_input.configure(state='disabled', font=("Verdana", 25), background="white")
 text_input.pack()
-text_input.place(x = 200, y = 120, width = 300, height = 45)
+text_input.place(x = 100, y = 120, width = 500, height = 45)
 
 text_correct = Text(panel)
 text_correct.tag_configure("center", justify='center')
 text_correct.tag_add("center", 1.0, "end")
 text_correct.configure(state='disabled', font=("Verdana", 25), background="white", cursor="arrow")
 text_correct.pack()
-text_correct.place(x = 200, y = 200, width = 300, height = 45)
+text_correct.place(x = 100, y = 200, width = 500, height = 45)
 
 text_time = Text(panelFrame)
 text_time.tag_configure("center", justify='center')
@@ -311,13 +326,30 @@ but_stat.bind("<Button-1>")
 but_stat.pack()
 but_stat.place(x = 420, y = 0, width = 80, height = 40)
 
-load = PIL.Image.open("images/settings.png")
-render = PIL.ImageTk.PhotoImage(load)
-but_settings = Button(panelFrame, image=render, command = settings)
-but_settings.image = render
+load1 = PIL.Image.open("images/settings.png")
+load2 = PIL.Image.open("images/list.png")
+load3 = PIL.Image.open("images/stat.png")
+
+render1 = PIL.ImageTk.PhotoImage(load1)
+but_settings = Button(panelFrame, image=render1, command = settings)
+but_settings.image = render1
 but_settings.bind("<Button-1>")
 but_settings.pack()
 but_settings.place(x = 660, y = 0, width = 40, height = 40)
+
+render2 = PIL.ImageTk.PhotoImage(load2)
+but_settings = Button(panelFrame, image=render2, command = show_txt)
+but_settings.image = render2
+but_settings.bind("<Button-1>")
+but_settings.pack()
+but_settings.place(x = 610, y = 0, width = 40, height = 40)
+
+render3 = PIL.ImageTk.PhotoImage(load3)
+but_settings = Button(panelFrame, image=render3, command = show_stat)
+but_settings.image = render3
+but_settings.bind("<Button-1>")
+but_settings.pack()
+but_settings.place(x = 560, y = 0, width = 40, height = 40)
 
 ########
 
@@ -335,6 +367,6 @@ text_change_time.configure(state='normal', font=("Verdana", 10), background="whi
 
 ########
 
-fill()
+fill(file)
 root.bind('<Key>', keypress)
 root.mainloop()
